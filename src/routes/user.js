@@ -1,11 +1,13 @@
-let CustomerModel = require('../models/customer_model')
+let UserModel = require('../models/user_model')
+let ProductModel = require('../models/product_model')
+
 let express = require('express')
 let jwt = require('jsonwebtoken')
 let router = express.Router()
 
 
 //POST
-router.post('/api/customer', verifyToken, (req, res) => {
+router.post('/api/product', verifyToken, (req, res) => {
     if (!req.body) {
         return res.status(400).send('Request body is missing')
     }
@@ -13,7 +15,7 @@ router.post('/api/customer', verifyToken, (req, res) => {
         if (err) {
             res.sendStatus(403)
         } else {
-            let model = new CustomerModel(req.body)
+            let model = new ProductModel(req.body)
             model.save()
                 .then(doc => {
                     if (!doc || doc.length === 0) {
@@ -21,8 +23,9 @@ router.post('/api/customer', verifyToken, (req, res) => {
                     }
                     res.status(201).json({
                         message: "Post created ...",
-                        authData
+                        doc
                     })
+
                 })
                 .catch(err => {
                     res.status(500).json(err)
@@ -33,24 +36,33 @@ router.post('/api/customer', verifyToken, (req, res) => {
 })
 
 router.post('/api/login', (req, res) => {
-    const user = {
-        name: 'Taleb',
-        email: 'talebriadhdz@gmail.com'
+    if (req.body.email &&
+        req.body.password) {
+        const user = UserModel.findOne({
+                email: req.body.email,
+                password: req.body.password
+            }).then(doc => {
+                jwt.sign({
+                    user
+                }, 'secretkey', (err, token) => {
+                    res.json({
+                        token
+                    })
+                })
+            })
+            .catch(err => {
+                res.json({
+                    message: "Login  failed, user not found!"
+                })
+            })
     }
-    jwt.sign({
-        user
-    }, 'secretkey', (err, token) => {
-        res.json({
-            token
-        })
-    })
 })
 
 
 //GET
-router.get('/api/customer', (req, res) => {
-    if (!req.query.email) {
-        CustomerModel.find()
+router.get('/api/product', (req, res) => {
+    if (!req.query.name) {
+        ProductModel.find()
             .then(doc => {
                 res.json(doc)
             })
@@ -58,8 +70,8 @@ router.get('/api/customer', (req, res) => {
                 res.status(500).json(err)
             })
     }
-    CustomerModel.findOne({
-            email: req.query.email
+    ProductModel.findOne({
+            name: req.query.name
         })
         .then(doc => {
             res.json(doc)
@@ -70,16 +82,16 @@ router.get('/api/customer', (req, res) => {
 })
 
 //UPADTE
-router.put('/api/customer', verifyToken, (req, res) => {
-    if (!req.query.email) {
+router.put('/api/product', verifyToken, (req, res) => {
+    if (!req.query.name) {
         return res.status(400).send('missing URL parameter: email')
     }
     jwt.verify(req.token, 'secretkey', (err, authData) => {
         if (err) {
             res.sendStatus(403)
         } else {
-            CustomerModel.findOneAndUpdate({
-                    email: req.query.email
+            ProductModel.findOneAndUpdate({
+                    name: req.query.name
                 }, req.body, {
                     new: true
                 })
@@ -98,16 +110,16 @@ router.put('/api/customer', verifyToken, (req, res) => {
 })
 
 //DELETE
-router.delete('/api/customer', (req, res) => {
-    if (!req.query.email) {
+router.delete('/api/product', (req, res) => {
+    if (!req.query.name) {
         return res.status(400).send('missing URL parameter: email')
     }
     jwt.verify(req.token, 'secretkey', (err, authData) => {
         if (err) {
             res.sendStatus(403)
         } else {
-            CustomerModel.findOneAndRemove({
-                    email: req.query.email
+            ProductModel.findOneAndRemove({
+                    name: req.query.name
                 }, req.body, {
                     new: true
                 })

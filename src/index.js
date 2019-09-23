@@ -3,7 +3,7 @@ require('dotenv').config()
 
 let app = express()
 let personRoute = require('./routes/person')
-let customerRoute = require('./routes/customer')
+let customerRoute = require('./routes/user')
 let path = require('path')
 let bodyParser = require('body-parser')
 

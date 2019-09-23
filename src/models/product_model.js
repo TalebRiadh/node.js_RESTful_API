@@ -5,13 +5,19 @@ mongoose.connect(connectionString, {
     useUnifiedTopology: true,
     useNewUrlParser: true
 })
-const CustomerSchema = new mongoose.Schema({
-    name: String,
-    email: {
+const PoductSchema = new mongoose.Schema({
+    name: {
         type: String,
         required: true,
-        unique: true
+    },
+    type: {
+        type: String,
+        required: true,
+    },
+    date: {
+        type: String,
+        default: new Date().toString()
     }
 })
 
-module.exports = mongoose.model('Customer', CustomerSchema)
+module.exports = mongoose.model('Product', PoductSchema)
