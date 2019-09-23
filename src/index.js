@@ -1,9 +1,7 @@
 let express = require('express')
 require('dotenv').config()
-
 let app = express()
-let personRoute = require('./routes/person')
-let customerRoute = require('./routes/user')
+let UserRoute = require('./routes/user')
 let path = require('path')
 let bodyParser = require('body-parser')
 
@@ -12,8 +10,7 @@ app.use((req, res, next) => {
     console.log(`${new Date().toString()} => ${req.originalUrl}`, req.body)
     next()
 })
-app.use(personRoute)
-app.use(customerRoute)
+app.use(UserRoute)
 app.use(express.static('public'))
 
 // Handler for 404- resource not found 
