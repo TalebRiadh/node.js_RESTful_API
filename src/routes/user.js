@@ -1,5 +1,6 @@
 let UserModel = require('../models/user_model')
 let ProductModel = require('../models/product_model')
+let path = require('path')
 
 let express = require('express')
 let jwt = require('jsonwebtoken')
@@ -28,20 +29,49 @@ router.post('/api/product', verifyToken, (req, res) => {
 
                 })
                 .catch(err => {
-                    res.status(500).json(err)
+                    res.json({
+                        message: "Login  failed, user not found!"
+                    })
                 })
         }
     })
 
 })
+router.post('/api/signup', (req, res) => {
+    let user = new UserModel(req.body.user)
+    user.save()
+        .then(doc => {
+            if (!doc || doc.length === 0) {
+                return res.status(500).send(doc)
+            }
+            res.status(201).json({
+                message: "User created ...",
+                doc
+            })
+        })
+        .catch(err => {
+            res.status(500).json({
+                message: "erreur",
+            })
+
+        })
+})
+router.get('/api', (req, res) => {
+    console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
+    res.json({
+        message: "welcome to TsaR's API"
+    })
+})
+
 
 router.post('/api/login', (req, res) => {
-    if (req.body.email &&
-        req.body.password) {
+    if (req.body.user.email &&
+        req.body.user.password) {
         const user = UserModel.findOne({
-                email: req.body.email,
-                password: req.body.password
+                email: req.body.user.email,
+                password: req.body.user.password
             }).then(doc => {
+                console.log('login success')
                 jwt.sign({
                     user
                 }, 'secretkey', (err, token) => {
@@ -57,7 +87,6 @@ router.post('/api/login', (req, res) => {
             })
     }
 })
-
 
 //GET
 router.get('/api/product', (req, res) => {
@@ -80,7 +109,6 @@ router.get('/api/product', (req, res) => {
             res.status(500).json(err)
         })
 })
-
 //UPADTE
 router.put('/api/product', verifyToken, (req, res) => {
     if (!req.query.name) {
@@ -108,7 +136,6 @@ router.put('/api/product', verifyToken, (req, res) => {
     })
 
 })
-
 //DELETE
 router.delete('/api/product', (req, res) => {
     if (!req.query.name) {
